@@ -32,6 +32,7 @@ export default class ReactPullToRefresh extends Component {
     const hammer = this.hammer;
     if (scrollTop <= 1) {
       this.setState({touchAction: 'pan-down', disabled: false});
+      container.style.transform = 'translate3d(0, 0, 0)';
     } else {
       this.setState({touchAction: 'unset', disabled: true});
     }
