@@ -1,21 +1,40 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import WebPullToRefresh from '../pull-to-refresh/wptr.1.1';
+import classnames from 'classnames';
 
 export default class ReactPullToRefresh extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      initialized: false
+      initialized: false,
+      disabled: false,
     };
     this.handleRefresh = this.handleRefresh.bind(this);
+    this.touchActionHandler = this.touchActionHandler.bind(this);
   }
 
   handleRefresh() {
     return new Promise((resolve, reject) => {
       this.props.onRefresh(resolve, reject);
     });
+  }
+
+  componentWillUnmount() {
+    const container = this.refs.refresh;
+    container.removeEventListener('scroll', this.touchActionHandler);
+  }
+
+  touchActionHandler() {
+    const container = this.refs.refresh;
+    const scrollTop = container.scrollTop;
+    const hammer = this.hammer;
+    if (scrollTop <= 1) {
+      this.setState({touchAction: 'pan-down', disabled: false});
+    } else {
+      this.setState({touchAction: 'unset', disabled: true});
+    }
   }
 
   init() {
@@ -36,9 +55,17 @@ export default class ReactPullToRefresh extends Component {
   }
 
   componentDidMount() {
-    if (!this.props.disabled) {
+    if (!this.props.disabled && !this.state.disabled) {
       this.init();
     }
+    const disposer = setInterval(() => {
+      const container = this.refs.refresh;
+      if (document.body.contains(container)) {
+        this.touchActionHandler();
+        container.addEventListener('scroll', this.touchActionHandler);
+        clearInterval(disposer);
+      }
+    }, 50);
   }
 
   componentDidUpdate() {
@@ -70,7 +97,7 @@ export default class ReactPullToRefresh extends Component {
 
     return (
       <div ref="body" {...rest}>
-        <div ref="ptr" className="ptr-element">
+        <div ref="ptr" className={classnames('ptr-element', {'disabled': this.state.disabled})}>
           {icon || <span className="genericon genericon-next"></span>}
           {loading ||
             <div className="loading">
@@ -79,7 +106,11 @@ export default class ReactPullToRefresh extends Component {
               <span className="loading-ptr-3"></span>
            </div>}
         </div>
-        <div ref="refresh" className="refresh-view">
+        <div ref="refresh" className={classnames('refresh-view', {
+          'disabled': this.state.disabled,
+        })} style={{
+          touchAction: this.state.touchAction,
+          }}>
           {children}
         </div>
       </div>

@@ -75,3 +75,16 @@ PropTypes
 
 ## Thanks
 [Andy Peatling](http://apeatling.com/)
+
+## hack scroll issue
+> to enable proper scroll capablilty, add css as blow
+```css
+.refresh-view.disabled {
+  transform: translate3d(0px, 0px, 0px) !important;
+}
+
+.ptr-element.disabled {
+  display: none !important;
+}
+```
+
