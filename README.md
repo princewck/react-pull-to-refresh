@@ -1,6 +1,6 @@
 # react-pull-to-refresh
 
-`npm install react-pull-to-refresh -S`
+`npm install react-pull2refresh -S`
 
 A pull to refresh component for the web.
 
